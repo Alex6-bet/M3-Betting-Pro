@@ -6,7 +6,7 @@ import streamlit as st
 
 
 st.set_page_config(
-    page_title="M-3 Betting Pro",
+    page_title="M-3 Betting Pro v1.1",
     page_icon="🎯",
     layout="wide",
 )
