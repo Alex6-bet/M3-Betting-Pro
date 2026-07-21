@@ -131,3 +131,47 @@ def run_simulation(
         "both_over_35": both_over_35_corners / simulations,
         "scores": most_common_scores,
     }
+    
+def american_to_decimal(odds: int) -> float:
+    """Convierte cuotas americanas a cuotas decimales."""
+    if odds == 0:
+        raise ValueError("La cuota americana no puede ser 0.")
+
+    if odds < 0:
+        return 1 + (100 / abs(odds))
+
+    return 1 + (odds / 100)
+
+
+def analyze_bet_value(
+    model_probability: float,
+    american_odds: int,
+    stake: float = 100.0,
+) -> dict:
+    """Calcula probabilidad implícita, ventaja y valor esperado."""
+
+    if not 0 <= model_probability <= 1:
+        raise ValueError("La probabilidad debe estar entre 0 y 1.")
+
+    if stake <= 0:
+        raise ValueError("La apuesta debe ser mayor que 0.")
+
+    decimal_odds = american_to_decimal(american_odds)
+    implied_probability = 1 / decimal_odds
+
+    profit_if_win = stake * (decimal_odds - 1)
+
+    expected_value = (
+        model_probability * profit_if_win
+        - (1 - model_probability) * stake
+    )
+
+    edge = model_probability - implied_probability
+
+    return {
+        "decimal_odds": decimal_odds,
+        "implied_probability": implied_probability,
+        "edge": edge,
+        "expected_value": expected_value,
+        "has_value": expected_value > 0,
+    } 
