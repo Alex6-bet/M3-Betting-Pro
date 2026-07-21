@@ -88,7 +88,7 @@ if st.button("☠️ Sacar veneno", type="primary", use_container_width=True):
             away_corners_average=away_corners_average,
             simulations=simulations,
         )
-
+        st.session_state["last_results"] = results
     st.success("Simulación terminada.")
 
     st.subheader("Probabilidades del partido")
@@ -197,18 +197,51 @@ else:
 st.divider()
 st.subheader("🎯 Detector de valor EV")
 st.caption("Compara la probabilidad calculada por M-3 con la cuota de la casa.")
+last_results = st.session_state.get("last_results")
 
+market_probabilities = {
+    "Introducir probabilidad manualmente": None,
+}
+
+if last_results:
+    market_probabilities.update(
+        {
+            "Victoria equipo local": last_results["home_win"] * 100,
+            "Empate": last_results["draw"] * 100,
+            "Victoria equipo visitante": last_results["away_win"] * 100,
+            "Local Over 2.5 córners": last_results["home_over_25"] * 100,
+            "Visitante Over 2.5 córners": last_results["away_over_25"] * 100,
+            "Ambos Over 2.5 córners": last_results["both_over_25"] * 100,
+            "Local Over 3.5 córners": last_results["home_over_35"] * 100,
+            "Visitante Over 3.5 córners": last_results["away_over_35"] * 100,
+            "Ambos Over 3.5 córners": last_results["both_over_35"] * 100,
+        }
+    )
+
+selected_market = st.selectbox(
+    "Mercado para analizar",
+    options=list(market_probabilities.keys()),
+)
+
+automatic_probability = market_probabilities[selected_market]
 ev_col1, ev_col2, ev_col3 = st.columns(3)
 
 with ev_col1:
-    model_probability_pct = st.number_input(
-        "Probabilidad M-3 (%)",
-        min_value=0.1,
-        max_value=99.9,
-        value=75.0,
-        step=0.1,
-        key="ev_probability",
-    )
+    if automatic_probability is None:
+        model_probability_pct = st.number_input(
+            "Probabilidad M-3 (%)",
+            min_value=0.1,
+            max_value=99.9,
+            value=75.0,
+            step=0.1,
+            key="ev_probability_manual",
+        )
+    else:
+        model_probability_pct = float(automatic_probability)
+        st.metric(
+            "Probabilidad M-3",
+            f"{model_probability_pct:.1f}%",
+        )
 
 with ev_col2:
     american_odds = st.number_input(
