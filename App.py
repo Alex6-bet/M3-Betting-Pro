@@ -205,18 +205,18 @@ market_probabilities = {
 
 if last_results:
     market_probabilities.update(
-        {
-            "Victoria equipo local": last_results["home_win"] * 100,
-            "Empate": last_results["draw"] * 100,
-            "Victoria equipo visitante": last_results["away_win"] * 100,
-            "Local Over 2.5 córners": last_results["home_over_25"] * 100,
-            "Visitante Over 2.5 córners": last_results["away_over_25"] * 100,
-            "Ambos Over 2.5 córners": last_results["both_over_25"] * 100,
-            "Local Over 3.5 córners": last_results["home_over_35"] * 100,
-            "Visitante Over 3.5 córners": last_results["away_over_35"] * 100,
-            "Ambos Over 3.5 córners": last_results["both_over_35"] * 100,
-        }
-    )
+    {
+        f"Victoria {home_team}": last_results["home_win"] * 100,
+        "Empate": last_results["draw"] * 100,
+        f"Victoria {away_team}": last_results["away_win"] * 100,
+        f"{home_team} Over 2.5 córners": last_results["home_over_25"] * 100,
+        f"{away_team} Over 2.5 córners": last_results["away_over_25"] * 100,
+        "Ambos equipos Over 2.5 córners": last_results["both_over_25"] * 100,
+        f"{home_team} Over 3.5 córners": last_results["home_over_35"] * 100,
+        f"{away_team} Over 3.5 córners": last_results["away_over_35"] * 100,
+        "Ambos equipos Over 3.5 córners": last_results["both_over_35"] * 100,
+    }
+)
 
 selected_market = st.selectbox(
     "Mercado para analizar",
