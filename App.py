@@ -3,7 +3,7 @@ import random
 
 import pandas as pd
 import streamlit as st
-from engine import run_simulation
+from engine import analyze_bet_value, run_simulation
 
 
 st.set_page_config(
@@ -194,3 +194,74 @@ else:
         "Introduce los promedios esperados y pulsa “Sacar veneno” "
         "para ejecutar la simulación."
     )
+st.divider()
+st.subheader("🎯 Detector de valor EV")
+st.caption("Compara la probabilidad calculada por M-3 con la cuota de la casa.")
+
+ev_col1, ev_col2, ev_col3 = st.columns(3)
+
+with ev_col1:
+    model_probability_pct = st.number_input(
+        "Probabilidad M-3 (%)",
+        min_value=0.1,
+        max_value=99.9,
+        value=75.0,
+        step=0.1,
+        key="ev_probability",
+    )
+
+with ev_col2:
+    american_odds = st.number_input(
+        "Cuota americana",
+        min_value=-5000,
+        max_value=5000,
+        value=-150,
+        step=5,
+        key="ev_odds",
+    )
+
+with ev_col3:
+    stake = st.number_input(
+        "Cantidad apostada ($)",
+        min_value=1.0,
+        value=100.0,
+        step=10.0,
+        key="ev_stake",
+    )
+
+if st.button("📊 Analizar valor", use_container_width=True):
+    if american_odds == 0:
+        st.error("La cuota americana no puede ser 0.")
+    else:
+        value = analyze_bet_value(
+            model_probability_pct / 100,
+            american_odds,
+            stake,
+        )
+
+        metric1, metric2, metric3, metric4 = st.columns(4)
+
+        metric1.metric(
+            "Probabilidad implícita",
+            f"{value['implied_probability']:.1%}",
+        )
+
+        metric2.metric(
+            "Edge M-3",
+            f"{value['edge']:.1%}",
+        )
+
+        metric3.metric(
+            "Valor esperado",
+            f"${value['expected_value']:+.2f}",
+        )
+
+        metric4.metric(
+            "Cuota decimal",
+            f"{value['decimal_odds']:.2f}",
+        )
+
+        if value["has_value"]:
+            st.success("✅ HAY VALOR MATEMÁTICO")
+        else:
+            st.warning("⚠️ NO HAY VALOR MATEMÁTICO")
